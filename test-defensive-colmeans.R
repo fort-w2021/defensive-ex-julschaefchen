@@ -32,8 +32,8 @@ test_that("behaves identically for equivalent inputs", {
 })
 
 test_that("behaves sensibly for empty inputs", {
-  expect_warning(col_means(mtcars[, 0]))
-  expect_warning(col_means(mtcars[0, ]))
+  expect_warning(col_means(mtcars[, 0]), "Empty")
+  expect_warning(col_means(mtcars[0, ]), "Empty")
   expect_data_frame(col_means(mtcars[, 0]),
                     max.rows = 0, max.cols = 0)
   expect_data_frame(col_means(mtcars[0, ]),
@@ -68,26 +68,30 @@ test_that("deals with factors, characters", {
   mtcars_fct$carb <- ordered(mtcars_fct$carb)
   expect_equal(col_means(mtcars)[, -11],
                col_means(mtcars_fct))
-  expect_warning(col_means(mtcars_fct[, "carb", drop = FALSE]))
+  expect_warning(col_means(mtcars_fct[, "carb", drop = FALSE]), 
+                 "The following columns of type factor")
   expect_equal(col_means(mtcars[, 0]),
                col_means(mtcars_fct[, "carb", drop = FALSE]))
 })
 
 #extra bonus:
-if (FALSE) {
- #deal with Date-variables as well
+#if (FALSE) {
+test_that("deals with Date-variables", {
     mtcars_date <- mtcars
     mtcars_date$date <- as.Date(seq_len(nrow(mtcars)), origin = Sys.Date())
     expect_equal(col_means(mtcars_date),
                  cbind(col_means(mtcars), date = mean(mtcars_date$date)))
-
-  #deal with matrix-columns
+})
+    
+test_that("deals with matrix-columns, list-columns", {
     mtcars_matrix <- mtcars
     mtcars_matrix$matrix_column <- as.matrix(mtcars[, 3:4])
-    # expect_what?
-
-  #deal with list-columns
+    expect_warning(col_means(mtcars_matrix),
+                   "For each of the following columns of class matrix")
+    
     mtcars_list <- mtcars
     mtcars_list$list_column <- list(mpg = mtcars$mpg, hp = mtcars$hp)
-    # expect_what?
-}
+    expect_warning(col_means(mtcars_list), 
+                   "The following columns of class list")
+})
+
